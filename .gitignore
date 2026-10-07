@@ -1,0 +1,28 @@
+# Binários
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+/bin/
+/tmp/
+
+# Testes
+*.test
+*.out
+coverage.*
+
+# Ambiente
+.env
+.env.*
+!.env.example
+
+# IDE / SO
+.vscode/
+.idea/
+*.swp
+Thumbs.db
+.DS_Store
+
+# Arquivos temporários do Word
+~$*.docx
