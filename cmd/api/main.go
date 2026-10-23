@@ -5,9 +5,9 @@ import (
 
 	"sigo/internal/config"
 	"sigo/internal/database"
-	"sigo/internal/router"
 	"sigo/internal/handler"
 	"sigo/internal/repository"
+	"sigo/internal/router"
 	"sigo/internal/service"
 )
 
@@ -24,7 +24,7 @@ func main() {
 	clienteRepo := repository.NewClienteRepository(pool)
 	clienteService := service.NewClienteService(clienteRepo)
 	clienteHandler := handler.NewClienteHandler(clienteService)
-	
+
 	r := router.New(cfg, router.Handlers{
 		Cliente: clienteHandler,
 	})

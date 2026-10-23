@@ -4,13 +4,13 @@ import (
 	"context"
 	"errors"
 	"regexp"
-	"strings"
 	"sigo/internal/model"
 	"sigo/internal/repository"
+	"strings"
 )
 
-var(
-	ErrNomeObrigatorio = errors.New("nome é obrigatório")
+var (
+	ErrNomeObrigatorio   = errors.New("nome é obrigatório")
 	ErrDocumentoInvalido = errors.New("CPF/CNPJ deve ter 11 ou 14 dígitos")
 )
 
@@ -40,7 +40,7 @@ func (s *ClienteService) Criar(ctx context.Context, c *model.Cliente) error {
 }
 
 func (s *ClienteService) Atualizar(ctx context.Context, c *model.Cliente) error {
-	if err:= normalizarCliente(c); err != nil {
+	if err := normalizarCliente(c); err != nil {
 		return err
 	}
 	return s.repo.Atualizar(ctx, c)

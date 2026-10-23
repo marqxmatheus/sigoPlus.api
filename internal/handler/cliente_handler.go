@@ -42,7 +42,7 @@ func (h *ClienteHandler) Buscar(c *gin.Context) {
 func (h *ClienteHandler) Criar(c *gin.Context) {
 	var cliente model.Cliente
 	if err := c.ShouldBindJSON(&cliente); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "dados inválidos: " + err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"erro": "dados inválidos: " + err.Error()})
 		return
 	}
 	if err := h.service.Criar(c.Request.Context(), &cliente); err != nil {
@@ -59,7 +59,7 @@ func (h *ClienteHandler) Atualizar(c *gin.Context) {
 	}
 	var cliente model.Cliente
 	if err := c.ShouldBindJSON(&cliente); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "dados inválidos: " + err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"erro": "dados inválidos: " + err.Error()})
 		return
 	}
 	cliente.ID = id

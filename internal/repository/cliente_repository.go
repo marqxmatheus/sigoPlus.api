@@ -26,8 +26,8 @@ func scanCliente(row pgx.Row) (model.Cliente, error) {
 }
 
 func (r *ClienteRepository) Listar(ctx context.Context) ([]model.Cliente, error) {
-    rows, err := r.db.Query(ctx, `SELECT `+colunasCliente+` FROM clientes ORDER BY nome ASC`)
-    if err != nil {
+	rows, err := r.db.Query(ctx, `SELECT `+colunasCliente+` FROM clientes ORDER BY nome ASC`)
+	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
@@ -72,7 +72,7 @@ func (r *ClienteRepository) Atualizar(ctx context.Context, c *model.Cliente) err
 
 func (r *ClienteRepository) Excluir(ctx context.Context, id int64) error {
 	tag, err := r.db.Exec(ctx, `DELETE FROM clientes WHERE id = $1`, id)
-	if err != nil{
+	if err != nil {
 		return traduzirErro(err)
 	}
 	if tag.RowsAffected() == 0 {
@@ -80,5 +80,3 @@ func (r *ClienteRepository) Excluir(ctx context.Context, id int64) error {
 	}
 	return nil
 }
-
-
