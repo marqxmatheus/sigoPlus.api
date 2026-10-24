@@ -27,8 +27,12 @@ func responderErro(c *gin.Context, err error) {
 		c.JSON(http.StatusNotFound, gin.H{"erro": err.Error()})
 	case errors.Is(err, repository.ErrDuplicado), errors.Is(err, repository.ErrEmUso):
 		c.JSON(http.StatusConflict, gin.H{"erro": err.Error()})
-	case errors.Is(err, service.ErrNomeObrigatorio), errors.Is(err, service.ErrDocumentoInvalido):
+	case errors.Is(err, service.ErrNomeObrigatorio),
+		errors.Is(err, service.ErrDocumentoInvalido),
+		errors.Is(err, service.ErrPlacaInvalida):		
 		c.JSON(http.StatusBadRequest, gin.H{"erro": err.Error()})
+	case errors.Is(err, service.ErrClienteInexistente):
+		c.JSON(http.StatusUnprocessableEntity, gin.H{"erro": err.Error()})
 	default:
 		log.Printf("Erro interno: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"erro": "Erro interno do servidor"})
