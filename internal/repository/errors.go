@@ -26,7 +26,7 @@ func traduzirErro(err error) error {
 		switch pgErr.Code {
 		case "23505":
 			return ErrDuplicado
-		case "23503":
+		case "23503", "23001":
 			return ErrEmUso
 		}
 	}
