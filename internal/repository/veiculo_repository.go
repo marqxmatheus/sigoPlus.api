@@ -5,7 +5,7 @@ import (
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
-	
+
 	"sigo/internal/model"
 )
 
@@ -19,7 +19,7 @@ func NewVeiculoRepository(db *pgxpool.Pool) *VeiculoRepository {
 
 const colunasVeiculo = `id, cliente_id, placa, marca, modelo, ano, created_at, updated_at`
 
-func scanVeiculo (row pgx.Row) (model.Veiculo, error) {
+func scanVeiculo(row pgx.Row) (model.Veiculo, error) {
 	var v model.Veiculo
 	err := row.Scan(&v.ID, &v.ClienteID, &v.Placa, &v.Marca, &v.Modelo, &v.Ano, &v.CreatedAt, &v.UpdatedAt)
 	return v, err

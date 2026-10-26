@@ -29,7 +29,8 @@ func responderErro(c *gin.Context, err error) {
 		c.JSON(http.StatusConflict, gin.H{"erro": err.Error()})
 	case errors.Is(err, service.ErrNomeObrigatorio),
 		errors.Is(err, service.ErrDocumentoInvalido),
-		errors.Is(err, service.ErrPlacaInvalida):		
+		errors.Is(err, service.ErrPlacaInvalida),
+		errors.Is(err, service.ErrDescricaoObrigatoria):
 		c.JSON(http.StatusBadRequest, gin.H{"erro": err.Error()})
 	case errors.Is(err, service.ErrClienteInexistente):
 		c.JSON(http.StatusUnprocessableEntity, gin.H{"erro": err.Error()})

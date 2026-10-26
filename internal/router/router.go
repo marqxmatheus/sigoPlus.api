@@ -10,6 +10,8 @@ import (
 type Handlers struct {
 	Cliente *handler.ClienteHandler
 	Veiculo *handler.VeiculoHandler
+	Servico *handler.ServicoHandler
+	Peca    *handler.PecaHandler
 }
 
 func New(cfg *config.Config, h Handlers) *gin.Engine {
@@ -38,6 +40,24 @@ func New(cfg *config.Config, h Handlers) *gin.Engine {
 			veiculos.POST("", h.Veiculo.Criar)
 			veiculos.PUT("/:id", h.Veiculo.Atualizar)
 			veiculos.DELETE("/:id", h.Veiculo.Excluir)
+		}
+
+		servicos := api.Group("/servicos")
+		{
+			servicos.GET("", h.Servico.Listar)
+			servicos.GET("/:id", h.Servico.Buscar)
+			servicos.POST("", h.Servico.Criar)
+			servicos.PUT("/:id", h.Servico.Atualizar)
+			servicos.DELETE("/:id", h.Servico.Excluir)
+		}
+
+		pecas := api.Group("/pecas")
+		{
+			pecas.GET("", h.Peca.Listar)
+			pecas.GET("/:id", h.Peca.Buscar)
+			pecas.POST("", h.Peca.Criar)
+			pecas.PUT("/:id", h.Peca.Atualizar)
+			pecas.DELETE("/:id", h.Peca.Excluir)
 		}
 	}
 	return r
