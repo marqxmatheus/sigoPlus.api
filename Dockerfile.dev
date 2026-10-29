@@ -1,0 +1,18 @@
+FROM golang:1.27.1-alpine
+
+RUN apk add --no-cache ca-certificates
+
+WORKDIR /app
+
+COPY go.mod go.sum ./
+RUN go mod download
+
+COPY . .
+
+# Aquece o cache de compilação para que a primeira inicialização da API não
+# ultrapasse o tempo do healthcheck em máquinas novas.
+RUN go build -o /tmp/sigo-api ./cmd/api
+
+EXPOSE 8080
+
+CMD ["go", "run", "./cmd/api"]

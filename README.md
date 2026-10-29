@@ -1,5 +1,64 @@
 # SIGO+ API
 
+## Ambiente completo com Docker
+
+O passo a passo completo para Windows e Linux está em
+[`GUIA_DOCKER.md`](GUIA_DOCKER.md).
+
+Esta é a forma recomendada de executar o projeto em uma máquina nova. É
+necessário ter apenas Docker Engine com Compose no Linux ou Docker Desktop com
+WSL2 no Windows.
+
+Os repositórios devem estar lado a lado e manter estes nomes:
+
+```text
+Sigo/
+├── sigoPlus.api/
+└── sigoPlus.web/
+```
+
+No diretório `sigoPlus.api`, execute:
+
+```bash
+docker compose up --build
+```
+
+O Compose cria o banco `sigo`, aplica todas as migrations e inicia:
+
+- Web: http://localhost:5173
+- API: http://localhost:8080
+- PostgreSQL: localhost:5432
+
+Os arquivos locais são montados nos containers. O Vite atualiza o navegador
+automaticamente quando o web é alterado. Após alterações na API, reinicie
+somente esse serviço:
+
+```bash
+docker compose restart api
+```
+
+Para acompanhar os logs:
+
+```bash
+docker compose logs -f api web
+```
+
+Para encerrar os serviços sem apagar o banco:
+
+```bash
+docker compose down
+```
+
+Para também apagar o volume e todos os dados do banco, use com cuidado:
+
+```bash
+docker compose down -v
+```
+
+As portas e credenciais locais podem ser personalizadas copiando
+`.env.example` para `.env`. Em caso de conflito com um PostgreSQL já instalado,
+por exemplo, altere `POSTGRES_PORT` para `5433`.
+
 ## Banco de dados local
 
 Requisitos: PostgreSQL, `psql`, Docker e Make.
