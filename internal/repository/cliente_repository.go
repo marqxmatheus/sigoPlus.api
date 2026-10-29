@@ -26,7 +26,7 @@ func scanCliente(row pgx.Row) (model.Cliente, error) {
 }
 
 func (r *ClienteRepository) Listar(ctx context.Context) ([]model.Cliente, error) {
-	rows, err := r.db.Query(ctx, `SELECT `+colunasCliente+` FROM clientes ORDER BY nome ASC`)
+	rows, err := r.db.Query(ctx, `SELECT `+colunasCliente+` FROM clientes WHERE ativo = TRUE ORDER BY nome ASC`)
 	if err != nil {
 		return nil, err
 	}
@@ -44,7 +44,7 @@ func (r *ClienteRepository) Listar(ctx context.Context) ([]model.Cliente, error)
 }
 
 func (r *ClienteRepository) BuscarPorID(ctx context.Context, id int64) (model.Cliente, error) {
-	row := r.db.QueryRow(ctx, `SELECT `+colunasCliente+` FROM clientes WHERE id = $1`, id)
+	row := r.db.QueryRow(ctx, `SELECT `+colunasCliente+` FROM clientes WHERE id = $1 AND ativo = TRUE`, id)
 	c, err := scanCliente(row)
 	return c, traduzirErro(err)
 }
@@ -63,7 +63,7 @@ func (r *ClienteRepository) Atualizar(ctx context.Context, c *model.Cliente) err
 	err := r.db.QueryRow(ctx,
 		`UPDATE clientes 
 		SET nome = $1, cpf_cnpj = $2, telefone = $3, email = $4, endereco = $5, updated_at = now()
-		WHERE id = $6 
+		WHERE id = $6 AND ativo = TRUE
 		RETURNING created_at, updated_at`,
 		c.Nome, c.CPFCNPJ, c.Telefone, c.Email, c.Endereco, c.ID,
 	).Scan(&c.CreatedAt, &c.UpdatedAt)
@@ -71,7 +71,19 @@ func (r *ClienteRepository) Atualizar(ctx context.Context, c *model.Cliente) err
 }
 
 func (r *ClienteRepository) Excluir(ctx context.Context, id int64) error {
-	tag, err := r.db.Exec(ctx, `DELETE FROM clientes WHERE id = $1`, id)
+	tag, err := r.db.Exec(ctx,
+		`UPDATE clientes
+		 SET nome = 'Cliente excluído',
+		     cpf_cnpj = '00000000000',
+		     telefone = '',
+		     email = '',
+		     endereco = '',
+		     ativo = FALSE,
+		     deleted_at = now(),
+		     updated_at = now()
+		 WHERE id = $1 AND ativo = TRUE`,
+		id,
+	)
 	if err != nil {
 		return traduzirErro(err)
 	}
