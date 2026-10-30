@@ -1,0 +1,3 @@
+DROP TABLE IF EXISTS os_pecas;
+DROP TABLE IF EXISTS os_servicos;
+DROP TABLE IF EXISTS ordens_servico;
