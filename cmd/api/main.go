@@ -37,11 +37,16 @@ func main() {
 	pecaService := service.NewPecaService(pecaRepo)
 	pecaHandler := handler.NewPecaHandler(pecaService)
 
+	ordemRepo := repository.NewOrdemServicoRepository(pool)
+	ordemService := service.NewOrdemServicoService(ordemRepo, clienteRepo, veiculoRepo, servicoRepo, pecaRepo)
+	ordemHandler := handler.NewOrdemServicoHandler(ordemService)
+
 	r := router.New(cfg, router.Handlers{
-		Cliente: clienteHandler,
-		Veiculo: veiculoHandler,
-		Servico: servicoHandler,
-		Peca:    pecaHandler,
+		Cliente:      clienteHandler,
+		Veiculo:      veiculoHandler,
+		Servico:      servicoHandler,
+		Peca:         pecaHandler,
+		OrdemServico: ordemHandler,
 	})
 
 	log.Printf("SIGO+ API rodando na porta %s", cfg.Port)

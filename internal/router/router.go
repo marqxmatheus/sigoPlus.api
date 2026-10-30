@@ -8,10 +8,11 @@ import (
 )
 
 type Handlers struct {
-	Cliente *handler.ClienteHandler
-	Veiculo *handler.VeiculoHandler
-	Servico *handler.ServicoHandler
-	Peca    *handler.PecaHandler
+	Cliente      *handler.ClienteHandler
+	Veiculo      *handler.VeiculoHandler
+	Servico      *handler.ServicoHandler
+	Peca         *handler.PecaHandler
+	OrdemServico *handler.OrdemServicoHandler
 }
 
 func New(cfg *config.Config, h Handlers) *gin.Engine {
@@ -58,6 +59,14 @@ func New(cfg *config.Config, h Handlers) *gin.Engine {
 			pecas.POST("", h.Peca.Criar)
 			pecas.PUT("/:id", h.Peca.Atualizar)
 			pecas.DELETE("/:id", h.Peca.Excluir)
+		}
+
+		ordens := api.Group("/ordens-servico")
+		{
+			ordens.GET("", h.OrdemServico.Listar)
+			ordens.GET("/:id", h.OrdemServico.Buscar)
+			ordens.POST("", h.OrdemServico.Criar)
+			ordens.DELETE("/:id", h.OrdemServico.Excluir)
 		}
 	}
 	return r

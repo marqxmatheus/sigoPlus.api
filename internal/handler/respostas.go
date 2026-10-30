@@ -25,14 +25,20 @@ func responderErro(c *gin.Context, err error) {
 	switch {
 	case errors.Is(err, repository.ErrNaoEncontrado):
 		c.JSON(http.StatusNotFound, gin.H{"erro": err.Error()})
-	case errors.Is(err, repository.ErrDuplicado), errors.Is(err, repository.ErrEmUso):
+	case errors.Is(err, repository.ErrDuplicado),
+		errors.Is(err, repository.ErrEmUso),
+		errors.Is(err, service.ErrOSNaoExcluivel):
 		c.JSON(http.StatusConflict, gin.H{"erro": err.Error()})
 	case errors.Is(err, service.ErrNomeObrigatorio),
 		errors.Is(err, service.ErrDocumentoInvalido),
 		errors.Is(err, service.ErrPlacaInvalida),
-		errors.Is(err, service.ErrDescricaoObrigatoria):
+		errors.Is(err, service.ErrDescricaoObrigatoria),
+		errors.Is(err, service.ErrOSSemItens):
 		c.JSON(http.StatusBadRequest, gin.H{"erro": err.Error()})
-	case errors.Is(err, service.ErrClienteInexistente):
+	case errors.Is(err, service.ErrClienteInexistente),
+		errors.Is(err, service.ErrVeiculoInvalido),
+		errors.Is(err, service.ErrServicoInexistente),
+		errors.Is(err, service.ErrPecaInexistente):
 		c.JSON(http.StatusUnprocessableEntity, gin.H{"erro": err.Error()})
 	default:
 		log.Printf("Erro interno: %v", err)
