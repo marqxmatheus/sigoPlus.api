@@ -52,6 +52,26 @@ func (h *OrdemServicoHandler) Criar(c *gin.Context) {
 	c.JSON(http.StatusCreated, ordem)
 }
 
+func (h *OrdemServicoHandler) Atualizar(c *gin.Context) {
+	id, ok := lerID(c)
+	if !ok {
+		return
+	}
+
+	var atualizacao model.OrdemServicoAtualizacao
+	if err := c.ShouldBindJSON(&atualizacao); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"erro": "dados inválidos: " + err.Error()})
+		return
+	}
+
+	ordem, err := h.service.Atualizar(c.Request.Context(), id, &atualizacao)
+	if err != nil {
+		responderErro(c, err)
+		return
+	}
+	c.JSON(http.StatusOK, ordem)
+}
+
 func (h *OrdemServicoHandler) Excluir(c *gin.Context) {
 	id, ok := lerID(c)
 	if !ok {

@@ -66,6 +66,7 @@ func New(cfg *config.Config, h Handlers) *gin.Engine {
 			ordens.GET("", h.OrdemServico.Listar)
 			ordens.GET("/:id", h.OrdemServico.Buscar)
 			ordens.POST("", h.OrdemServico.Criar)
+			ordens.PUT("/:id", h.OrdemServico.Atualizar)
 			ordens.DELETE("/:id", h.OrdemServico.Excluir)
 		}
 	}

@@ -35,6 +35,22 @@ services:
         condition: service_healthy
     restart: "no"
 
+  seed:
+    image: postgres:16-alpine
+    environment:
+      PGHOST: postgres
+      PGPORT: 5432
+      PGUSER: ${POSTGRES_USER:-postgres}
+      PGPASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      PGDATABASE: ${POSTGRES_DB:-sigo}
+    command: ["psql", "-v", "ON_ERROR_STOP=1", "-f", "/seeds/minimum.sql"]
+    volumes:
+      - ./seeds:/seeds:ro
+    depends_on:
+      migrations:
+        condition: service_completed_successfully
+    restart: "no"
+
   api:
     build:
       context: .
@@ -48,7 +64,7 @@ services:
     volumes:
       - .:/app
     depends_on:
-      migrations:
+      seed:
         condition: service_completed_successfully
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:8080/api/v1/health"]

@@ -23,7 +23,8 @@ No diretório `sigoPlus.api`, execute:
 docker compose up --build
 ```
 
-O Compose cria o banco `sigo`, aplica todas as migrations e inicia:
+O Compose cria o banco `sigo`, aplica todas as migrations, cadastra os dados
+mínimos para criar uma ordem de serviço e inicia:
 
 - Web: http://localhost:5173
 - API: http://localhost:8080
@@ -69,8 +70,14 @@ A configuração padrão usa PostgreSQL em `localhost:5432`, usuário e senha
 ```bash
 make db-create
 make migrate-up
+make seed-minimum
 make migrate-version
 ```
+
+O seed mínimo é idempotente: ele cadastra duas combinações completas de
+cliente, veículo, serviço e peça apenas quando esses registros ainda não
+existem. Por isso, o comando pode ser executado novamente sem gerar
+duplicidades.
 
 As migrations ficam em `migrations/` e são executadas pelo
 [`golang-migrate`](https://github.com/golang-migrate/migrate) em um container.

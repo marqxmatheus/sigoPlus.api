@@ -74,8 +74,9 @@ Na primeira execução, o Docker irá:
 1. Baixar as imagens de PostgreSQL, Go e Node.js.
 2. Criar o banco de dados `sigo`.
 3. Executar todas as migrations disponíveis.
-4. Compilar e iniciar a API.
-5. Instalar as dependências e iniciar o web.
+4. Cadastrar os dados mínimos para criar uma ordem de serviço.
+5. Compilar e iniciar a API.
+6. Instalar as dependências e iniciar o web.
 
 O primeiro build pode levar alguns minutos. Aguarde as mensagens indicando que
 a API está ouvindo na porta `8080` e que o Vite está pronto.
@@ -136,6 +137,11 @@ recrie o fluxo dos serviços com:
 docker compose down
 docker compose up --build
 ```
+
+O serviço `seed` é executado depois das migrations e antes da API. Ele garante,
+sem duplicar registros, duas combinações completas de cliente, veículo
+vinculado, serviço e peça. Assim, uma instalação nova já pode criar ordens de
+serviço pelo web.
 
 ## 7. Encerrar o ambiente
 

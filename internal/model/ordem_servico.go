@@ -22,20 +22,34 @@ const (
 )
 
 type OrdemServico struct {
-	ID             int64                     `json:"id"`
-	ClienteID      int64                     `json:"cliente_id" binding:"required"`
-	ClienteNome    string                    `json:"cliente_nome"`
-	VeiculoID      int64                     `json:"veiculo_id" binding:"required"`
-	VeiculoPlaca   string                    `json:"veiculo_placa"`
-	Situacao       SituacaoOS                `json:"situacao"`
-	ValorTotal     float64                   `json:"valor_total"`
-	Observacao     string                    `json:"observacao"`
-	Servicos       []OrdemServicoItemServico `json:"servicos,omitempty" binding:"dive"`
-	Pecas          []OrdemServicoItemPeca    `json:"pecas,omitempty" binding:"dive"`
-	FormaPagamento *FormaPagamento           `json:"forma_pagamento,omitempty"`
-	DataPagamento  *time.Time                `json:"data_pagamento,omitempty"`
-	CreatedAt      time.Time                 `json:"created_at"`
-	UpdatedAt      time.Time                 `json:"updated_at"`
+	ID              int64                     `json:"id"`
+	ClienteID       int64                     `json:"cliente_id" binding:"required"`
+	ClienteNome     string                    `json:"cliente_nome"`
+	ClienteTelefone string                    `json:"cliente_telefone"`
+	ClienteEmail    string                    `json:"cliente_email"`
+	ClienteEndereco string                    `json:"cliente_endereco"`
+	VeiculoID       int64                     `json:"veiculo_id" binding:"required"`
+	VeiculoPlaca    string                    `json:"veiculo_placa"`
+	VeiculoMarca    string                    `json:"veiculo_marca"`
+	VeiculoModelo   string                    `json:"veiculo_modelo"`
+	VeiculoAno      int                       `json:"veiculo_ano"`
+	Situacao        SituacaoOS                `json:"situacao"`
+	ValorTotal      float64                   `json:"valor_total"`
+	Observacao      string                    `json:"observacao"`
+	Servicos        []OrdemServicoItemServico `json:"servicos,omitempty" binding:"dive"`
+	Pecas           []OrdemServicoItemPeca    `json:"pecas,omitempty" binding:"dive"`
+	FormaPagamento  *FormaPagamento           `json:"forma_pagamento,omitempty"`
+	DataPagamento   *time.Time                `json:"data_pagamento,omitempty"`
+	CreatedAt       time.Time                 `json:"created_at"`
+	UpdatedAt       time.Time                 `json:"updated_at"`
+}
+
+// OrdemServicoAtualizacao representa os campos editáveis de uma ordem. As
+// coleções recebidas substituem integralmente os serviços e peças atuais.
+type OrdemServicoAtualizacao struct {
+	Observacao string                    `json:"observacao" binding:"max=500"`
+	Servicos   []OrdemServicoItemServico `json:"servicos" binding:"dive"`
+	Pecas      []OrdemServicoItemPeca    `json:"pecas" binding:"dive"`
 }
 
 type OrdemServicoItemServico struct {

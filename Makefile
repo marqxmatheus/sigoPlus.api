@@ -2,7 +2,7 @@ DATABASE_URL ?= postgres://postgres:postgres@localhost:5432/sigo?sslmode=disable
 POSTGRES_URL ?= postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable
 MIGRATE_IMAGE ?= migrate/migrate:v4.18.3
 
-.PHONY: db-create migrate-up migrate-down migrate-version
+.PHONY: db-create migrate-up migrate-down migrate-version seed-minimum
 
 db-create:
 	@psql "$(POSTGRES_URL)" -v ON_ERROR_STOP=1 -tAc \
@@ -23,3 +23,9 @@ migrate-version:
 	@docker run --rm --network host \
 		-v "$(CURDIR)/migrations:/migrations:ro" \
 		$(MIGRATE_IMAGE) -path=/migrations -database "$(DATABASE_URL)" version
+
+seed-minimum:
+	@docker run --rm --network host \
+		-v "$(CURDIR)/seeds:/seeds:ro" \
+		postgres:16-alpine psql "$(DATABASE_URL)" \
+		-v ON_ERROR_STOP=1 -f /seeds/minimum.sql

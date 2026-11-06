@@ -38,7 +38,8 @@ func responderErro(c *gin.Context, err error) {
 	case errors.Is(err, service.ErrClienteInexistente),
 		errors.Is(err, service.ErrVeiculoInvalido),
 		errors.Is(err, service.ErrServicoInexistente),
-		errors.Is(err, service.ErrPecaInexistente):
+		errors.Is(err, service.ErrPecaInexistente),
+		errors.Is(err, service.ErrItemOSInvalido):
 		c.JSON(http.StatusUnprocessableEntity, gin.H{"erro": err.Error()})
 	default:
 		log.Printf("Erro interno: %v", err)

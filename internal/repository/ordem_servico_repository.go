@@ -17,7 +17,8 @@ func NewOrdemServicoRepository(db *pgxpool.Pool) *OrdemServicoRepository {
 	return &OrdemServicoRepository{db: db}
 }
 
-const colunasOS = `o.id, o.cliente_id, c.nome, o.veiculo_id, v.placa, o.situacao, o.valor_total,
+const colunasOS = `o.id, o.cliente_id, c.nome, c.telefone, c.email, c.endereco,
+	o.veiculo_id, v.placa, v.marca, v.modelo, v.ano, o.situacao, o.valor_total,
 	o.observacao, o.forma_pagamento, o.data_pagamento, o.created_at, o.updated_at`
 
 const fromOS = ` FROM ordens_servico o
@@ -34,8 +35,11 @@ const sqlRecalcularTotal = `
 
 func scanOS(row pgx.Row) (model.OrdemServico, error) {
 	var o model.OrdemServico
-	err := row.Scan(&o.ID, &o.ClienteID, &o.ClienteNome, &o.VeiculoID, &o.VeiculoPlaca, &o.Situacao,
-		&o.ValorTotal, &o.Observacao, &o.FormaPagamento, &o.DataPagamento, &o.CreatedAt, &o.UpdatedAt)
+	err := row.Scan(
+		&o.ID, &o.ClienteID, &o.ClienteNome, &o.ClienteTelefone, &o.ClienteEmail, &o.ClienteEndereco,
+		&o.VeiculoID, &o.VeiculoPlaca, &o.VeiculoMarca, &o.VeiculoModelo, &o.VeiculoAno, &o.Situacao,
+		&o.ValorTotal, &o.Observacao, &o.FormaPagamento, &o.DataPagamento, &o.CreatedAt, &o.UpdatedAt,
+	)
 	return o, err
 }
 
@@ -167,6 +171,138 @@ func (r *OrdemServicoRepository) Criar(ctx context.Context, ordem *model.OrdemSe
 	}
 
 	return tx.Commit(ctx)
+}
+
+func (r *OrdemServicoRepository) Atualizar(ctx context.Context, ordem *model.OrdemServico) error {
+	tx, err := r.db.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+
+	err = tx.QueryRow(ctx,
+		`UPDATE ordens_servico
+		 SET observacao = $1, updated_at = now()
+		 WHERE id = $2
+		 RETURNING updated_at`,
+		ordem.Observacao, ordem.ID,
+	).Scan(&ordem.UpdatedAt)
+	if err != nil {
+		return traduzirErro(err)
+	}
+
+	if err := sincronizarServicos(ctx, tx, ordem); err != nil {
+		return err
+	}
+	if err := sincronizarPecas(ctx, tx, ordem); err != nil {
+		return err
+	}
+
+	if err := tx.QueryRow(ctx, sqlRecalcularTotal, ordem.ID).Scan(&ordem.ValorTotal); err != nil {
+		return traduzirErro(err)
+	}
+
+	return tx.Commit(ctx)
+}
+
+func sincronizarServicos(ctx context.Context, tx pgx.Tx, ordem *model.OrdemServico) error {
+	idsMantidos := make([]int64, 0, len(ordem.Servicos))
+	for i := range ordem.Servicos {
+		if ordem.Servicos[i].ID > 0 {
+			idsMantidos = append(idsMantidos, ordem.Servicos[i].ID)
+		}
+	}
+
+	if _, err := tx.Exec(ctx,
+		`DELETE FROM os_servicos
+		 WHERE ordem_servico_id = $1
+		   AND NOT (id = ANY($2::bigint[]))`,
+		ordem.ID, idsMantidos,
+	); err != nil {
+		return traduzirErro(err)
+	}
+
+	for i := range ordem.Servicos {
+		item := &ordem.Servicos[i]
+		item.OrdemServicoID = ordem.ID
+
+		if item.ID > 0 {
+			tag, err := tx.Exec(ctx,
+				`UPDATE os_servicos
+				 SET servico_id = $1, valor = $2
+				 WHERE id = $3 AND ordem_servico_id = $4`,
+				item.ServicoID, item.Valor, item.ID, ordem.ID,
+			)
+			if err != nil {
+				return traduzirErro(err)
+			}
+			if tag.RowsAffected() != 1 {
+				return ErrNaoEncontrado
+			}
+			continue
+		}
+
+		if err := tx.QueryRow(ctx,
+			`INSERT INTO os_servicos (ordem_servico_id, servico_id, valor)
+			 VALUES ($1, $2, $3)
+			 RETURNING id`,
+			ordem.ID, item.ServicoID, item.Valor,
+		).Scan(&item.ID); err != nil {
+			return traduzirErro(err)
+		}
+	}
+
+	return nil
+}
+
+func sincronizarPecas(ctx context.Context, tx pgx.Tx, ordem *model.OrdemServico) error {
+	idsMantidos := make([]int64, 0, len(ordem.Pecas))
+	for i := range ordem.Pecas {
+		if ordem.Pecas[i].ID > 0 {
+			idsMantidos = append(idsMantidos, ordem.Pecas[i].ID)
+		}
+	}
+
+	if _, err := tx.Exec(ctx,
+		`DELETE FROM os_pecas
+		 WHERE ordem_servico_id = $1
+		   AND NOT (id = ANY($2::bigint[]))`,
+		ordem.ID, idsMantidos,
+	); err != nil {
+		return traduzirErro(err)
+	}
+
+	for i := range ordem.Pecas {
+		item := &ordem.Pecas[i]
+		item.OrdemServicoID = ordem.ID
+
+		if item.ID > 0 {
+			tag, err := tx.Exec(ctx,
+				`UPDATE os_pecas
+				 SET peca_id = $1, quantidade = $2, valor_unitario = $3
+				 WHERE id = $4 AND ordem_servico_id = $5`,
+				item.PecaID, item.Quantidade, item.ValorUnitario, item.ID, ordem.ID,
+			)
+			if err != nil {
+				return traduzirErro(err)
+			}
+			if tag.RowsAffected() != 1 {
+				return ErrNaoEncontrado
+			}
+			continue
+		}
+
+		if err := tx.QueryRow(ctx,
+			`INSERT INTO os_pecas (ordem_servico_id, peca_id, quantidade, valor_unitario)
+			 VALUES ($1, $2, $3, $4)
+			 RETURNING id`,
+			ordem.ID, item.PecaID, item.Quantidade, item.ValorUnitario,
+		).Scan(&item.ID); err != nil {
+			return traduzirErro(err)
+		}
+	}
+
+	return nil
 }
 
 func (r *OrdemServicoRepository) Excluir(ctx context.Context, id int64) error {
