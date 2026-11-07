@@ -33,7 +33,8 @@ func responderErro(c *gin.Context, err error) {
 		errors.Is(err, service.ErrDocumentoInvalido),
 		errors.Is(err, service.ErrPlacaInvalida),
 		errors.Is(err, service.ErrDescricaoObrigatoria),
-		errors.Is(err, service.ErrOSSemItens):
+		errors.Is(err, service.ErrOSSemItens),
+		errors.Is(err, service.ErrPeriodoInvalido):
 		c.JSON(http.StatusBadRequest, gin.H{"erro": err.Error()})
 	case errors.Is(err, service.ErrClienteInexistente),
 		errors.Is(err, service.ErrVeiculoInvalido),

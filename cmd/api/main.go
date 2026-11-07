@@ -42,7 +42,7 @@ func main() {
 	ordemHandler := handler.NewOrdemServicoHandler(ordemService)
 
 	relatorioRepo := repository.NewRelatorioRepository(pool)
-	relatorioService := service.NewRelatorioService(relatorioRepo)
+	relatorioService := service.NewRelatorioService(relatorioRepo, clienteRepo)
 	relatorioHandler := handler.NewRelatorioHandler(relatorioService)
 
 	r := router.New(cfg, router.Handlers{

@@ -74,6 +74,8 @@ func New(cfg *config.Config, h Handlers) *gin.Engine {
 		relatorios := api.Group("/relatorios")
 		{
 			relatorios.GET("/estoque", h.Relatorio.Estoque)
+			relatorios.GET("/ordens-periodo", h.Relatorio.OrdensPeriodo)
+			relatorios.GET("/ordens-cliente", h.Relatorio.OrdensCliente)
 		}
 	}
 	return r

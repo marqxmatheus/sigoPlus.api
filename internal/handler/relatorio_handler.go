@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 
@@ -37,4 +38,54 @@ func (h *RelatorioHandler) Estoque(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, rel)
+}
+
+func (h *RelatorioHandler) OrdensPeriodo(c *gin.Context) {
+	dataInicio, ok := lerData(c, "data_inicio")
+	if !ok {
+		return
+	}
+	dataFim, ok := lerData(c, "data_fim")
+	if !ok {
+		return
+	}
+
+	rel, err := h.service.OrdensPeriodo(c.Request.Context(), dataInicio, dataFim)
+	if err != nil {
+		responderErro(c, err)
+		return
+	}
+	c.JSON(http.StatusOK, rel)
+}
+
+func (h *RelatorioHandler) OrdensCliente(c *gin.Context) {
+	var clienteID *int64
+	if valor := strings.TrimSpace(c.Query("cliente_id")); valor != "" {
+		id, err := strconv.ParseInt(valor, 10, 64)
+		if err != nil || id <= 0 {
+			c.JSON(http.StatusBadRequest, gin.H{"erro": "cliente_id inválido"})
+			return
+		}
+		clienteID = &id
+	}
+
+	rel, err := h.service.OrdensCliente(c.Request.Context(), clienteID)
+	if err != nil {
+		responderErro(c, err)
+		return
+	}
+	c.JSON(http.StatusOK, rel)
+}
+
+func lerData(c *gin.Context, campo string) (*time.Time, bool) {
+	valor := strings.TrimSpace(c.Query(campo))
+	if valor == "" {
+		return nil, true
+	}
+	data, err := service.ParseData(valor)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"erro": campo + " inválida, use o formato AAAA-MM-DD"})
+		return nil, false
+	}
+	return &data, true
 }
