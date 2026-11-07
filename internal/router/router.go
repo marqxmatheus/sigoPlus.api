@@ -13,6 +13,7 @@ type Handlers struct {
 	Servico      *handler.ServicoHandler
 	Peca         *handler.PecaHandler
 	OrdemServico *handler.OrdemServicoHandler
+	Relatorio    *handler.RelatorioHandler
 }
 
 func New(cfg *config.Config, h Handlers) *gin.Engine {
@@ -68,6 +69,11 @@ func New(cfg *config.Config, h Handlers) *gin.Engine {
 			ordens.POST("", h.OrdemServico.Criar)
 			ordens.PUT("/:id", h.OrdemServico.Atualizar)
 			ordens.DELETE("/:id", h.OrdemServico.Excluir)
+		}
+
+		relatorios := api.Group("/relatorios")
+		{
+			relatorios.GET("/estoque", h.Relatorio.Estoque)
 		}
 	}
 	return r
