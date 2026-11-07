@@ -113,27 +113,39 @@ variáveis do ambiente; o arquivo `.env` não é carregado automaticamente.
 | Estoque de peças (RF7) | `/api/v1/relatorios/estoque` | `busca`, `abaixo_minimo` |
 | Ordens de serviço por período | `/api/v1/relatorios/ordens-periodo` | `data_inicio`, `data_fim` |
 | Ordens de serviço por cliente | `/api/v1/relatorios/ordens-cliente` | `cliente_id` |
+
 ### Estoque de peças
+
 - `busca`: procura no código ou na descrição, ignorando maiúsculas e minúsculas (não ignora acentos).
 - `abaixo_minimo=true`: só as peças com `qtd_estoque < estoque_minimo`.
 - Cada item tem `abaixo_minimo: true/false`, para destacar a linha na tela.
+
 ### Ordens por período
+
 - Usa a **data de abertura** da ordem e traz **qualquer situação**.
 - `data_inicio` e `data_fim` são inclusivos: `2026-11-07` até `2026-11-07` traz o dia 7 inteiro.
 - Sem filtros, traz todas as ordens.
+
 ### Ordens por cliente
+
 - Com `cliente_id`, a resposta traz o objeto `cliente` (mesmo formato de `GET /clientes/:id`) para o cabeçalho do relatório.
 - Sem `cliente_id`, traz todas as ordens e o campo `cliente` não vem.
 - Cliente existente sem ordens: `200` com `itens: []`.
 Os dois relatórios de ordens vêm ordenados da mais recente para a mais antiga.
+
 ### Erros
+
 Mesmo formato do resto da API: `{ "erro": "mensagem" }`.
 - `400`: data fora do formato, data inicial maior que a final, `cliente_id` ou `abaixo_minimo` inválidos.
 - `404`: `cliente_id` de cliente inexistente.
+
 ### Datas
+
 - `data_emissao` vem no horário de Brasília (`-03:00`); `data_abertura` e `data_pagamento` vêm em UTC (`Z`).
 - Para exibir, converter sempre com `new Date(valor).toLocaleString('pt-BR')`, que ajusta o fuso automaticamente.
+
 ### Tipos sugeridos (`src/types/relatorio.ts`)
+
 ```ts
 import type { Cliente } from './cliente'
 import type { FormaPagamento, SituacaoOS } from './ordemServico'
@@ -184,7 +196,9 @@ export type RelatorioOSCliente = {
   valor_total: number
 }
 ```
+
 ### Funções sugeridas (`src/api/relatorios.ts`)
+
 O axios monta a query string a partir de `params` e ignora os valores `undefined`, então os filtros vazios simplesmente não são enviados.
 ```ts
 import type {
@@ -221,7 +235,9 @@ export async function relatorioOrdensCliente(cliente_id?: number) {
   return data
 }
 ```
+
 ### Exemplo de resposta (`/ordens-cliente?cliente_id=2`)
+
 ```json
 {
   "data_emissao": "2026-11-07T11:55:32-03:00",
